@@ -9,7 +9,7 @@ import (
 )
 
 // each item client corresponds to a particular item id in the game
-type itemClient struct {
+type ItemClient struct {
 	ReSendInterval                       time.Duration // time it waits until resend, in milliseconds
 	ItemId                               string
 	EffectState                          map[string]string
@@ -27,11 +27,11 @@ type itemClient struct {
 // PoolOfUniqueCodesHandler takes in a new code and
 // 1. check if it is a duplicated msg, return -1 if so
 // 2. if not, add msg to the pool and make sure the pool has length capped at max, return 1
-func (myClient *itemClient) poolOfUniqueCodesHandler(newCode string) int {
+func (myClient *ItemClient) poolOfUniqueCodesHandler(newCode string) int {
 	return myClient.PoolOfUniqueCodes.Put(newCode)
 }
 
-func (myClient *itemClient) SendRoutine() {
+func (myClient *ItemClient) SendRoutine() {
 	for {
 		if len(myClient.ChanMqttMsgToPub) > 0 {
 			// check if stucked
@@ -62,7 +62,7 @@ func (myClient *itemClient) SendRoutine() {
 
 // 1. deal with reply msg, i.e. unblock the send routine
 // 2. deal with duplicated msg, put new msg into system nats pub channel
-func (myClient *itemClient) ReceiveRoutine() {
+func (myClient *ItemClient) ReceiveRoutine() {
 	for {
 		// mqtt msg received, check if its reply msg
 		select {
@@ -91,7 +91,7 @@ func (myClient *itemClient) ReceiveRoutine() {
 
 }
 
-func (myClient *itemClient) Reset() {
+func (myClient *ItemClient) Reset() {
 	myClient.MsgPubing = escapeRoomDataTypes.MqttMsg{}
 	myClient.PoolOfUniqueCodes.Reset()
 	myClient.EffectState = make(map[string]string)
@@ -99,9 +99,9 @@ func (myClient *itemClient) Reset() {
 
 }
 
-func NewItemClient(itemId string, natsChannel *chan escapeRoomDataTypes.MqttMsg, mqttChannel *chan escapeRoomDataTypes.MqttMsg) *itemClient {
+func NewItemClient(itemId string, natsChannel *chan escapeRoomDataTypes.MqttMsg, mqttChannel *chan escapeRoomDataTypes.MqttMsg) *ItemClient {
 
-	return &itemClient{
+	return &ItemClient{
 		ReSendInterval:                       1000,
 		ItemId:                               itemId,
 		EffectState:                          make(map[string]string),
